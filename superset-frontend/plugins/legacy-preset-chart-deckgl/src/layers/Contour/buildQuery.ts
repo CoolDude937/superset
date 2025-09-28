@@ -16,5 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-type FlashMessageType = 'info' | 'alert' | 'danger' | 'warning' | 'success';
-export type FlashMessage = [FlashMessageType, string];
+import { SpatialFormData, buildSpatialQuery } from '../spatialUtils';
+
+export interface DeckContourFormData extends SpatialFormData {
+  cellSize?: string;
+  aggregation?: string;
+  contours?: Array<{
+    color: { r: number; g: number; b: number };
+    lowerThreshold: number;
+    upperThreshold?: number;
+    strokeWidth?: number;
+  }>;
+}
+
+export default function buildQuery(formData: DeckContourFormData) {
+  return buildSpatialQuery(formData);
+}
