@@ -2718,17 +2718,29 @@ CalHeatMap.prototype = {
    */
   getMonthDomain: function (d, range) {
     'use strict';
-
-    var start = new Date(d.getFullYear(), d.getMonth());
-    var stop = null;
+    var start = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth()));
+    var stopExclusive = null;
     if (range instanceof Date) {
-      stop = new Date(range.getFullYear(), range.getMonth());
+      stopExclusive = new Date(Date.UTC(range.getUTCFullYear(), range.getUTCMonth()));
     } else {
-      stop = new Date(start);
-      stop = stop.setMonth(stop.getMonth() + range);
+      stopExclusive = new Date(start);
+      stopExclusive.setUTCMonth(stopExclusive.getUTCMonth() + (range - 1));
     }
+    // apparently error can occur if from >= to for even a millisecond. Trying to
+    // make sure that doesn't happen.
+    if (start >= stopExclusive) {
+      console.warn('Adjusting dates: start >= stopExclusive');
+      stopExclusive = new Date(start);
+      stopExclusive.setUTCMonth(stopExclusive.getUTCMonth() + 1);
+    }
+    console.log('range:', range.toISOString());
+    console.log('date(d):', d.toISOString());
+    console.log('start(inc):', start.toISOString());
+    console.log('stop(exc):', stopExclusive.toISOString());
+    var months = d3.time.months(start, stopExclusive);
+    console.log('months returned:', months.map(m => m.toISOString()));
 
-    return d3.time.months(Math.min(start, stop), Math.max(start, stop));
+    return d3.time.months(Math.min(start, stopExclusive), Math.max(start,stopExclusive));
   },
 
   /**
